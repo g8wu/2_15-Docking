@@ -1,0 +1,63 @@
+---
+title: "Docking Hands-on BIMM 143 2_15"
+output: html_notebook
+---
+
+Download and prep HIV-1  PR structure '1hsg'. This creates file in the working dir
+```{r}
+library(bio3d)
+file.name<-get.pdb('1hsg')
+hiv<-read.pdb(file.name)
+```
+
+Prep initial protein and ligand input files
+```{r}
+prot <- trim.pdb(hiv, 'protein')
+lig <- trim.pdb(hiv, 'ligand')
+
+write.pdb(prot, file = '1hsg_protein.pdb')
+write.pdb(lig, '1hsg_ligand.pdb')
+```
+Now, launch AutoDock Tools (ADT)
+On ADT: File > Read
+
+*Note that on ADT you have to type in save file path or drag and drop. Save to this project folder.
+
+##Prepare a docking config file
+On a .txt file enter calculations for docking.
+In terminal run Vina with input dockconfig.txt,
+specify to record output in log.txt
+
+(example file: dockconfig.txt)
+1hsg ADT specs:
+Spacing: 1
+Coord: (16, 25, 4) obtained from ADT Grid box tool
+Dim: (30, 30, 30) obtained from ADT Grid box tool
+
+##Dock Ligand
+Terminal input:
+~/Downloads/autodock_vina_1_1_2_mac/bin/vina --config dockconfig.txt --log log.txt
+
+**Download docking software at:**
+http://vina.scripps.edu/download.html
+We will run it from Terminal/Cmd Line
+*A fast docking program that requires minimal user intervention and is often employed for HT cirtual screening.*
+
+##Analyze Docking Results on VMD
+```{r}
+library(bio3d)
+res <- read.pdb('all.pdbqt', multi = TRUE)
+write.pdb(res, 'results.pdb')
+```
+Open VMD and load results.pdb and hsg_protein.pdb
+play around to create an understandable representation.
+Then you can press play on VMD Main to see how ADT attempted different dockings.
+
+Compare original ligand with added H using rmsd()
+```{r}
+res<- read.pdb('all.pdbqt', multi = TRUE)
+ori <- read.pdb('hsg_ligand.pdbqt')
+rmsd(ori,res)
+```
+
+
